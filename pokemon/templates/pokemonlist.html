@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+
+{% block content %}
+    <table class="table">
+        {% for list in pokemon %}
+        <tr>
+        {% for poke in list %}
+        <td>
+        <div class="card rounded mx-auto d-block" style="width: 18rem;">
+            <img class="card-img-top rounded mx-auto d-block" src="{{poke.image}}" alt="Card image cap" style="padding:1em;">
+            <div class="card-body">
+                <h5 class="card-title">#{{poke.id}} - {{poke.name}}</h5>
+                <li class="card-text">Height = {{poke.height}} m</li>
+                <li class="card-text">Weight = {{poke.weight}} kg</li>
+                <li class="card-text">Type(s)
+                {% for type in poke.type_name.all %}
+                    {% comment %} <button type="button" class="btn btn-primary"><img src={{type.image}} style="width:10px" />{{type}}</button> {% endcomment %}
+                    <img src={{type.image}} style="width:2rem" />
+                {% endfor %}    
+                </li>    
+            </div>
+        </div>
+        <td>
+        {% endfor %}   
+        </tr>
+        {% endfor %}        
+        
+    </table>
+{% endblock content %}
