@@ -6,7 +6,7 @@ from django.db import models
 class Type(models.Model):
     type_name = models.CharField(max_length=8)
     image = models.URLField(default="")
-
+    color = models.CharField(default="", max_length=7)
     def __str__(self) -> str:
         return self.type_name
 
