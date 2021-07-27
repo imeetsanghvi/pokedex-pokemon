@@ -1,10 +1,11 @@
+from django.db.models.query import QuerySet
 from django.shortcuts import render
 import requests
 from django.http import HttpResponse
 from django.shortcuts import render
-
+from pokemon.filters import PokemonFilter
 from .models import Pokemon, Type
-
+import json
 # Create your views here.
 
 types = Type.objects.all()
@@ -99,17 +100,48 @@ def get_home_page(request):
 
 
 def get_all(request):
-    all_pokemon_list = Pokemon.objects.all()
-    all_pokemon_list = get3dList(all_pokemon_list)
+    pokemon_list = Pokemon.objects.all()
+    # req = dict(request.GET.items())
+    req = request
+    print(req.GET)
+    name = req.GET.get('name')
+    type_name = req.GET.getlist('type_name')
+    gen = req.GET.getlist('generation')
+    reg = req.GET.getlist('region')
+    type_name = [type for type in type_name if len(type)!=0]
+    gen = [int(g) for g in gen if len(g)!=0]
+    reg = [r.capitalize() for r in reg if len(r)!=0]
+    print(name, type_name, gen, reg)
+    if name not in [None, ""]:
+        print('getting by name')
+        pokemon_list = pokemon_list.filter(name__icontains=name.capitalize())
+    if len(type_name)!=0:
+        print('getting by type')
+        pokemon_list = pokemon_list.filter(type_name__id__in = type_name)
+    if len(gen)!=0:
+        print('getting by gen')
+        print(len(gen))
+        pokemon_list = pokemon_list.filter(generation__in=gen)
+    if len(reg)!=0:
+        print('getting by region')
+        print(len(reg))
+        pokemon_list = pokemon_list.filter(region__in=reg)
+    
+    filteredPokemon_list = PokemonFilter(request.GET,queryset=Pokemon.objects.all()[:50])
+    print(type(filteredPokemon_list))
     context = {
-        'pokemon': all_pokemon_list,
         'types': types,
         'regions': regions,
         'generations': generations,
         'title': 'All Pokemon',
         'colors': colors
     }
-    return render(request=request, template_name='pokemonlist.html', context=context)
+    
+    filtered_pokemon = PokemonFilter(request=request, queryset=pokemon_list)
+    pokemon =  get3dList(filtered_pokemon.qs)
+    context['filtered_pokemon'] = filtered_pokemon
+    context['pokemon'] = pokemon
+    return render(request=request, template_name="pokemonlist.html", context=context)
 
 
 def get_pokemon_from_region(request, region_name):

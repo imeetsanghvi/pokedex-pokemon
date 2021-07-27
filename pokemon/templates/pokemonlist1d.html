@@ -1,18 +1,35 @@
 {% extends 'base.html' %} 
 {% load bootstrap %}
 {% block content %}
-<form method='get' class="your-class">
+
+
+<form method='get'>
   {{filtered_pokemon.form|bootstrap}}
-  <br><br><input class="btn btn-primary" type="submit" value="search"></input>
+  <input type="submit" value="search"></input>
 </form>
 <br>
-{% comment %} {{filtered_pokemon.qs}} {% endcomment %}
-<br><h5>total pokemon found - {{filtered_pokemon.qs|length}} </h5>
+{% comment %} {% for poke in filtered_pokemon.qs %}
+    <h4>{{poke.id}} - {{poke.name}}</h4>
+    <br>
+{% endfor %} {% endcomment %}
+
+{% for list in filtered_pokemon.qs|batch(3) %}
+<div class="row">
+    {% for poke in list %}
+    <div class="span4"><h4>{{poke.id}} - {{poke.name}}</h4></div>
+    {% endfor %}
+</div>
+{% endfor %}
+{% comment %} <p>Top Line</p>
+<div class="d-flex justify-content-between">
+  <form method='get'>
+    {{f_pokemon|bootstrap}}
+    <input class="btn btn-primary" type="submit" value="filter">
+  </form>
+</div>
+<p>Top Line</p>
 <table class="table">
-  {% comment %} {% for list in pokemon %} {% endcomment %}
-  <tr>
-    {% for poke in filtered_pokemon.qs %}
-    <tr>
+  {% for poke in f_pokemon2 %}
       <div
         class="card rounded px-2 py-1 mb-2"
         type="button"
@@ -44,12 +61,7 @@
           <h3 class="card-title text-center">{{poke.name}}</h3>
         </div>
       </div>
-    </tr> 
-
-
-    <td>
-     <br>{% endfor %} <br></td>
-  </tr>
-  {% comment %} {% endfor %} {% endcomment %}
-</table>
+  {% endfor %}
+</table> {% endcomment %}
 {% endblock content %}
+
