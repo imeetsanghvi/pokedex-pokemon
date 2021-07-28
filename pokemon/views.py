@@ -4,13 +4,12 @@ import requests
 from django.http import HttpResponse
 from django.shortcuts import render
 from pokemon.filters import PokemonFilter
-from .models import Pokemon, Type
+from .models import Pokemon, Regen, Type
 import json
 # Create your views here.
 
 types = Type.objects.all()
-regions = Pokemon.objects.order_by().values('region').distinct()
-generations = Pokemon.objects.order_by().values('generation').distinct()
+generation = Regen.objects.all()
 colors = {
     'grass': '#63BB5B',
     'fire': '#FF9C54',
@@ -24,10 +23,10 @@ colors = {
     'dragon': '#0A6DC4',
     'normal': '#f9199A1',
     'flying': '#8FA8DD',
-    'fighting': '#D80A49',
+    'fighting': '#5269AC',
     'psychic': '#F97176',
-    'ghost': '#5269AC',
-    'dark': '#5A5366',
+    'ghost': '#8596c5',
+    'dark': '#776d86',
     'steel': '#5A8EA1',
     'fairy': '#EC8FE6',
     'unknown': '#000000',
@@ -57,24 +56,29 @@ type_logos = {
     'shadow': 'https://static.thenounproject.com/png/57788-200.png'
 }
 
+context = {
+    'types': types,
+    'generation':generation,
+}
 
 def get_generation_and_region(id):
     if id in range(1, 152):
-        return 1, 'Kanto'
+        gen = 1
     elif id in range(152, 252):
-        return 2, 'Johto'
+        gen = 2
     elif id in range(252, 387):
-        return 3, 'Hoenn'
+        gen = 3
     elif id in range(387, 494):
-        return 4, 'Sinnoh'
+        gen = 4
     elif id in range(494, 650):
-        return 5, 'Unova'
+        gen = 5
     elif id in range(650, 722):
-        return 6, 'Kalos'
+        gen = 6
     elif id in range(722, 810):
-        return 7, 'Alola'
+        gen = 7
     elif id in range(810, 899):
-        return 8, 'Galar'
+        gen = 8
+    return Regen.objects.get(gen = gen)
 
 
 def get_img_url(id):
@@ -90,106 +94,49 @@ def get3dList(pklist, n=3) -> list:
 
 
 def get_home_page(request):
-    context = {
-        'types': types,
-        'regions': regions,
-        'generations': generations,
-        'title': 'Home Page'
-    }
+    context['title'] = 'Pokedex'
     return render(request=request, template_name='home.html', context=context)
 
 
+# pokemon fetch and queries
 def get_all(request):
     pokemon_list = Pokemon.objects.all()
     # req = dict(request.GET.items())
     req = request
-    print(req.GET)
+    # print(req.GET)
+    
     name = req.GET.get('name')
     type_name = req.GET.getlist('type_name')
-    gen = req.GET.getlist('generation')
-    reg = req.GET.getlist('region')
+    
+    regen = req.GET.getlist('regen')
+    # print(regen)
     type_name = [type for type in type_name if len(type)!=0]
-    gen = [int(g) for g in gen if len(g)!=0]
-    reg = [r.capitalize() for r in reg if len(r)!=0]
-    print(name, type_name, gen, reg)
+    regen = [int(gen) for gen in regen]
+    # print(name, type_name, regen)
     if name not in [None, ""]:
-        print('getting by name')
         pokemon_list = pokemon_list.filter(name__icontains=name.capitalize())
     if len(type_name)!=0:
-        print('getting by type')
         pokemon_list = pokemon_list.filter(type_name__id__in = type_name)
-    if len(gen)!=0:
-        print('getting by gen')
-        print(len(gen))
-        pokemon_list = pokemon_list.filter(generation__in=gen)
-    if len(reg)!=0:
-        print('getting by region')
-        print(len(reg))
-        pokemon_list = pokemon_list.filter(region__in=reg)
-    
-    filteredPokemon_list = PokemonFilter(request.GET,queryset=Pokemon.objects.all()[:50])
-    print(type(filteredPokemon_list))
-    context = {
-        'types': types,
-        'regions': regions,
-        'generations': generations,
-        'title': 'All Pokemon',
-        'colors': colors
-    }
-    
+    if len(regen)!=0:
+        pokemon_list = pokemon_list.filter(regen__gen__in = regen)
+            
     filtered_pokemon = PokemonFilter(request=request, queryset=pokemon_list)
     pokemon =  get3dList(filtered_pokemon.qs)
+    
     context['filtered_pokemon'] = filtered_pokemon
     context['pokemon'] = pokemon
+    context['title'] = 'Pokemon'
     return render(request=request, template_name="pokemonlist.html", context=context)
 
 
-def get_pokemon_from_region(request, region_name):
-    all_pokemon_list = Pokemon.objects.filter(region=region_name.capitalize())
-    all_pokemon_list = get3dList(all_pokemon_list)
-    context = {
-        'pokemon': all_pokemon_list,
-        'types': types,
-        'regions': regions,
-        'generations': generations,
-        'title': f'Region - {region_name.capitalize()}',
-        'colors': colors
-    }
-    return render(request=request, template_name='pokemonlist.html', context=context)
 
-
-def get_pokemon_from_generation(request, gid):
-    all_pokemon_list = Pokemon.objects.filter(generation=gid)
-    all_pokemon_list = get3dList(all_pokemon_list)
-    context = {
-        'pokemon': all_pokemon_list,
-        'types': types,
-        'regions': regions,
-        'generations': generations,
-        'title': f'Generation - {gid}',
-        'colors': colors
-    }
-    return render(request=request, template_name='pokemonlist.html', context=context)
-
-
-def get_pokemon_from_types(request, type_name):
-    all_pokemon_list = Pokemon.objects.filter(type_name__type_name=type_name)
-    all_pokemon_list = get3dList(all_pokemon_list)
-    context = {
-        'pokemon': all_pokemon_list,
-        'types': types,
-        'regions': regions,
-        'generations': generations,
-        'title': f'Types - {type_name.capitalize()}',
-        'colors': colors
-    }
-    return render(request=request, template_name='pokemonlist.html', context=context)
-
-
+# working with the models and data set
 def load_pokemon():
+    
     total_pokemon_count = requests.get(
         "https://pokeapi.co/api/v2/pokemon/").json().get('count')
     poke_api_url = "https://pokeapi.co/api/v2/pokemon/"
+    
     for i in range(1, total_pokemon_count):
         response = requests.get(poke_api_url+str(i)).json()
         id = response.get('id')
@@ -197,16 +144,28 @@ def load_pokemon():
         height = response.get('height')/10
         weight = response.get('weight')/10
         image = get_img_url(id)
-        generation, region = get_generation_and_region(id)
-        poke = Pokemon(id=id, name=name, height=height, weight=weight,
-                       image=image, generation=generation, region=region)
+        regen = get_generation_and_region(id)
+        
+        poke = Pokemon(id=id, name=name, height=height, weight=weight, image=image, regen = regen )
         poke.save()
+        
         for x in response.get('types'):
             type_name = x.get('type').get('name')
             mType = Type.objects.get(type_name=type_name)
             poke.type_name.add(mType)
+        
         poke.save()
+        
     print('pokemon data load success')
+
+
+def add_pokemon_regen():
+    pokemomn = Pokemon.objects.all()
+    for poke in pokemomn:
+        regen = get_generation_and_region(poke.id)
+        poke.regen.add(regen)
+        poke.save()
+        print(poke)
 
 
 def load_types():
@@ -222,11 +181,36 @@ def load_types():
                     image=type_image, color=type_color)
         type.save()
     print('type data load success')
+    
+
+def load_regen():
+    regen = {
+        1: "Kanto",
+        2: "Johto",
+        3: "Hoenn",
+        4: "Sinnoh",
+        5: "Unova",
+        6: "Kalos",
+        7: "Alola",
+        8: "Galar",
+    }
+    
+    for gen, reg in regen.items():
+        Regen(gen = gen, reg = reg).save()
+    print(Regen.objects.all())
+    return HttpResponse('Pokemon data loaded successfully')
 
 
 def load_data(request):
     # Type.objects.all().delete()
     # load_types()
+    
+    # Regen.objects
+    # load_regen()
+    
     # Pokemon.objects.all().delete()
     # load_pokemon()
+    
+    # add_pokemon_regen()
+    
     return HttpResponse('Pokemon data loaded successfully')

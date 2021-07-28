@@ -5,25 +5,22 @@
     <br><h1>Select one of the generations / regions / types to view some pokemon</h1>
     <table>
     <tr class="row">
-    <td class="col">
-    <h5>Generation</h5>
-    {% for gen in generations %}
-        <li><a href="/generation/{{gen.generation}}">{{gen.generation}}</a></li>
-    {% endfor %}
-    </td>
-    
-    <td class="col">
-    <h5>Region</h5>
-    {% for reg in regions %}
-        <li><a href="/region/{{reg.region}}">{{reg.region}}</a></li>
-    {% endfor %}
-    </td>
-    <td class="col">
-     <h5>Types</h5>
-    {% for type in types %}
-        <li><a href="/types/{{type.type_name}}/">{{type.type_name}}</a></li>
-    {% endfor %}
-    </td>
+        <td class="col">
+            <h5>Generation</h5>
+            {% for gen in generation %}
+                        <li>
+                            <a href="/pokemon/?regen={{gen.gen}}">{{gen.gen}} -  {{gen.reg}}</a>
+                        </li>
+            {% endfor %}
+        </td>    
+        <td class="col">
+            <h5>Types</h5>
+            {% for type in types %}
+                <li><a href="/pokemon/?type_name={{type.id}}">
+                &nbsp;{{type.type_name|capfirst}}
+                </a></li>
+            {% endfor %}
+        </td>
     </tr>
     </table>
     

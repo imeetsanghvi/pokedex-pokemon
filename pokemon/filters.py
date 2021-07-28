@@ -7,6 +7,5 @@ class PokemonFilter(django_filters.FilterSet):
         # fields = '__all__'
         fields = ['name',
                   'type_name',
-                  'generation',
-                  'region'
+                  'regen'
                   ]

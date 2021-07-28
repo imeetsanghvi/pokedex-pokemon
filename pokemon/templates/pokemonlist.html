@@ -1,55 +1,62 @@
 {% extends 'base.html' %} 
 {% load bootstrap %}
-{% block content %}
-<form method='get' class="your-class">
+{% block menubar %}
+<div class="container">
+<nav class="sidebar position-fixed col-sm-3">
+<div class="container form-control">
+<form method='get' class="float-center ">
   {{filtered_pokemon.form|bootstrap}}
-  <br><br><input class="btn btn-primary" type="submit" value="search"></input>
+  <br><br><input class="btn btn-primary" type="submit" value="Filter"></input>
 </form>
-<br>
-{% comment %} {{filtered_pokemon.qs}} {% endcomment %}
-<br><h5>total pokemon found - {{filtered_pokemon.qs|length}} </h5>
-<table class="table">
-  {% comment %} {% for list in pokemon %} {% endcomment %}
+
+<br><br>
+<h5>Total Pokemon Found - {{filtered_pokemon.qs|length}} </h5>
+</div>
+</nav>
+</div>
+{% endblock%}
+
+
+
+{% block content %}
+  {% for list in pokemon %}
+  <table class="table">
   <tr>
-    {% for poke in filtered_pokemon.qs %}
-    <tr>
+    {% for poke in list %}
+    <td>
       <div
-        class="card rounded px-2 py-1 mb-2"
+        class="card rounded px-2 mb-0"
         type="button"
-        style="width: 18rem; background-color: {{poke.type_name.values.last.color}}"
-      >
-        <div class="d-flex justify-content-between mt-1">
-          <div class="d-flex flex-row align-items-center">
-            <div class="ms-2 mt-1 c-details">
-              <h6 class="">
-                <b>#{{poke.id}} / Gen {{poke.generation}} / {{poke.region}}</b>
-              </h6>
+        style="width: 18rem; background-color: {{poke.type_name.values.last.color}}">
+          
+          <div class="d-flex justify-content-between mt-1">
+            <div class="d-flex flex-row align-items-center">
+              <div class="ms-2 mt-1 c-details">
+                <h6 class="">
+                  <b>#{{poke.id}} / ReGen - {{poke.regen.first.gen}}, {{poke.regen.first.reg}}</b>
+                </h6>
+              </div>
+            </div>
+
+            <div class="d-flex justify-content-end">
+              <span class="text1">
+                {% for type in poke.type_name.all %}
+                <img
+                  src="{{type.image}}"
+                  style="width: 2rem"
+                  class="border border-dark rounded-circle"
+                />
+                {% endfor %}
+              </span>
             </div>
           </div>
-          <div class="d-flex justify-content-end">
-            <span class="text1">
-              {% for type in poke.type_name.all %}
-              <img
-                src="{{type.image}}"
-                style="width: 2rem"
-                class="border border-dark rounded-circle"
-              />
-              {% endfor %}
-            </span>
-          </div>
-        </div>
-        <img class="card-img-top rounded img-fluid" src="{{poke.image}}"
-        alt="Card image cap" onclick="display_random_image();>
-        <div class="mx-2 mb-1">
+
+          <img class="card-img-top rounded img-fluid" src="{{poke.image}}" alt="Card image cap">
           <h3 class="card-title text-center">{{poke.name}}</h3>
-        </div>
       </div>
-    </tr> 
-
-
-    <td>
-     <br>{% endfor %} <br></td>
+    {% endfor %} 
   </tr>
-  {% comment %} {% endfor %} {% endcomment %}
-</table>
+  </table>
+  {% endfor %}
+
 {% endblock content %}
