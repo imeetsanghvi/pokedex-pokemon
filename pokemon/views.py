@@ -98,6 +98,22 @@ def get_home_page(request):
     return render(request=request, template_name='home.html', context=context)
 
 
+# def get_developer(request):
+#     links = [
+#         ['bi bi-github','Github','https://github.com/imeetsanghvi', 'imeetsanghvi'],
+#         ['bi bi-linkedin','LinkedIn','https://linkedin.com/in/imeetsanghvi', 'imeetsanghvi'],
+#         ['bi bi-code-slash','Leet Code','https://linkedin.com/in/imeetsanghvi', 'imeetsanghvi'],
+#         ['bi bi-code-slash','HackerRank','https://linkedin.com/in/imeetsanghvi', 'imeetsanghvi'],
+#         ['bi bi-youtube','Youtube', 'https://youtube.com/c/meetsanghvi', 'meetsanghvi'],
+#         ['bi bi-instagram','Instagram', 'https://instagram.com/imeetsanghvi', 'imeetsanghvi'],
+#         ['bi bi-facebook','Facebook', 'https://facebook.com/imeetsanghvi', 'imeetsanghvi'],
+#         ['bi bi-twitter','Twitter', 'https://twitter.com/imeetsanghvi', 'imeetsanghvi'],
+#     ]
+#     context['title'] = 'Developer'
+#     context['links'] = links
+#     return render(request=request, template_name='developer-contact.html', context=context)
+
+
 # pokemon fetch and queries
 def get_all(request):
     pokemon_list = Pokemon.objects.all()
@@ -212,5 +228,6 @@ def load_data(request):
     # load_pokemon()
     
     # add_pokemon_regen()
+    # print('do some procesing')
     
     return HttpResponse('Pokemon data loaded successfully')
