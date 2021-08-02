@@ -21,9 +21,9 @@ colors = {
     'rock': '#C7B78B',
     'bug': '#90C12C',
     'dragon': '#0A6DC4',
-    'normal': '#f9199A1',
+    'normal': '#FDEBD0',
     'flying': '#8FA8DD',
-    'fighting': '#5269AC',
+    'fighting': '#D80A49',
     'psychic': '#F97176',
     'ghost': '#8596c5',
     'dark': '#776d86',
@@ -160,9 +160,9 @@ def load_pokemon():
         height = response.get('height')/10
         weight = response.get('weight')/10
         image = get_img_url(id)
-        regen = get_generation_and_region(id)
+        # regen = get_generation_and_region(id)
         
-        poke = Pokemon(id=id, name=name, height=height, weight=weight, image=image, regen = regen )
+        poke = Pokemon(id=id, name=name, height=height, weight=weight, image=image )
         poke.save()
         
         for x in response.get('types'):
@@ -176,8 +176,8 @@ def load_pokemon():
 
 
 def add_pokemon_regen():
-    pokemomn = Pokemon.objects.all()
-    for poke in pokemomn:
+    pokemon = Pokemon.objects.all()
+    for poke in pokemon:
         regen = get_generation_and_region(poke.id)
         poke.regen.add(regen)
         poke.save()
@@ -196,6 +196,7 @@ def load_types():
         type = Type(index+1, type_name=type_name,
                     image=type_image, color=type_color)
         type.save()
+        
     print('type data load success')
     
 
@@ -214,13 +215,25 @@ def load_regen():
     for gen, reg in regen.items():
         Regen(gen = gen, reg = reg).save()
     print(Regen.objects.all())
-    return HttpResponse('Pokemon data loaded successfully')
+    
+    return HttpResponse('Pokemon region data loaded successfully')
 
 
+def load_pokemon_images():
+    pokemon = Pokemon.objects.all()
+    for poke in pokemon:
+        print(poke.id)
+        
+        img_url = f"https://assets.pokemon.com/assets/cms2/img/pokedex/full/{str(poke.id).zfill(3)}.png"
+        poke.image = img_url
+        poke.save()
+        # print(poke)
+        
 def load_data(request):
     # Type.objects.all().delete()
     # load_types()
     
+    # Regen.objects.all().delete()
     # Regen.objects
     # load_regen()
     
@@ -229,5 +242,7 @@ def load_data(request):
     
     # add_pokemon_regen()
     # print('do some procesing')
+    
+    # load_pokemon_images()
     
     return HttpResponse('Pokemon data loaded successfully')
